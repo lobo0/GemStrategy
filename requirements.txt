@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+jinja2
+pandas
+python-multipart
+requests
+beautifulsoup4
+curl_cffi
+yfinance
+gunicorn
+pytest
+pytest-asyncio
+httpx
+python-dateutil

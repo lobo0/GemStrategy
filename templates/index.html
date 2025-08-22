@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategia GEM - Rekomendacja Inwestycyjna</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+        }
+        .recommendation {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+        }
+  .legal-footer {
+    border-top: 1px solid #ddd;
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  .legal-footer .container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+
+  .legal-footer .legal-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+          .legal-footer p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .chart-container canvas {
+            max-height: 100%;
+            max-width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card text-center">
+            <div class="card-header">
+                <h1>Strategia Inwestycyjna GEM</h1>
+            </div>
+            <div class="card-body">
+                <p class="lead">Wprowadź datę odniesienia, aby uzyskać rekomendację, w który ETF zainwestować zgodnie ze strategią Global Equities Momentum (GEM).</p>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="reference_date" class="form-label">Data odniesienia:</label>
+                        <input type="date" id="reference_date" name="reference_date" value="{{ today_date }}" class="form-control" style="max-width: 200px; margin: auto;">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">Oblicz Rekomendację</button>
+                </form>
+            </div>
+        </div>
+
+        {% if choice %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Rekomendacja</h2>
+            </div>
+            <div class="card-body text-center">
+                <p class="recommendation">{{ choice }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Wyniki Analizy ETF</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Zwrot % (12M)</th>
+                            <th>Zakres Dat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in results %}
+                        <tr>
+                            <td><b>{{ r.ticker }}</b></td>
+                            <td>
+                                {% if r.return is not none %}
+                                    <span class="{{ 'text-success' if r.return > 0 else 'text-danger' }}">{{ r.return }}%</span>
+                                {% else %}
+                                    <span class="text-muted">brak danych</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if r.start and r.end %}
+                                    {{ r.start }} - {{ r.end }}
+                                {% else %}
+                                    <span class="text-muted">brak danych</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if chart_data %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Wykres Wyników</h2>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if benchmark and benchmark.return is not none %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Analiza Porównawcza (Benchmark)</h2>
+            </div>
+            <div class="card-body">
+                <p>Dla porównania, strategia "kup i trzymaj" dla indeksu S&P 500 (ETF: SPY) w tym samym okresie przyniosła następujący wynik:</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Benchmark</th>
+                            <th>Zwrot % (12M)</th>
+                            <th>Zakres Dat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>{{ benchmark.name }}</b></td>
+                            <td><span class="{{ 'text-success' if benchmark.return > 0 else 'text-danger' }}">{{ benchmark.return }}%</span></td>
+                            <td>{{ benchmark.start }} - {{ benchmark.end }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get chart data from Jinja template
+            const chartDataJson = '{{ chart_data|safe }}';
+            let chartData = null;
+            
+            try {
+                chartData = JSON.parse(chartDataJson);
+            } catch (error) {
+                console.error('Error parsing chart data:', error);
+                return;
+            }
+            
+            if (chartData && chartData.length > 0) {
+                const datasets = chartData.map(etf => {
+                    if (!etf.data || etf.data.length === 0) {
+                        return null;
+                    }
+                    
+                    const initialPrice = etf.data[0].price;
+                    if (!initialPrice || initialPrice <= 0) {
+                        return null;
+                    }
+                    
+                    return {
+                        label: etf.name,
+                        data: etf.data.map(d => ({
+                            x: new Date(d.date), 
+                            y: (d.price / initialPrice - 1) * 100
+                        })),
+                        fill: false,
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    };
+                }).filter(dataset => dataset !== null);
+
+                if (datasets.length === 0) {
+                    console.warn('No valid datasets found for chart');
+                    return;
+                }
+
+                const ctx = document.getElementById('performanceChart');
+                if (!ctx) {
+                    console.error('Chart canvas element not found');
+                    return;
+                }
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white',
+                                borderColor: 'rgba(255, 255, 255, 0.2)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month',
+                                    displayFormats: {
+                                        month: 'MMM yyyy'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Data',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Zwrot (%)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return value.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 2
+                            },
+                            point: {
+                                radius: 4,
+                                hoverRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <br>
+<footer class="legal-footer mt-5">
+  <div class="container">
+    <p class="legal-title">⚠️ Nota prawna – ostrzeżenie o ryzyku</p>
+    <p>
+      Informacje na tej stronie dotyczące strategii GEM mają wyłącznie charakter edukacyjny i ogólnoinformacyjny. 
+      Nie stanowią rekomendacji inwestycyjnych, analiz inwestycyjnych ani usług doradztwa finansowego.
+    </p>
+    <p>
+      Autor strony nie ponosi odpowiedzialności za decyzje ani straty wynikające z korzystania z treści. 
+      Każdy użytkownik podejmuje decyzje finansowe na własne ryzyko.
+    </p>
+    <p>
+      Przed podjęciem działań inwestycyjnych zaleca się konsultację z wykwalifikowanym doradcą finansowym.
+    </p>
+  </div>
+</footer>
+</body>
+</html>

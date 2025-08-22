@@ -1,0 +1,32 @@
+runtime: python311
+service: gemstrategy
+
+env_variables:
+  ENVIRONMENT: "production"
+  API_DEBUG: "false"
+  API_TITLE: "GemStrategy API"
+  API_DESCRIPTION: "Investment strategy analysis API"
+  API_VERSION: "1.0.0"
+  DATA_CACHE_TTL_HOURS: "4"
+  DATA_MAX_RETRIES: "3"
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  min_idle_instances: 1
+  max_idle_instances: 3
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+handlers:
+  - url: /static
+    static_dir: static
+    secure: always
+
+  - url: /.*
+    script: auto
+    secure: always
