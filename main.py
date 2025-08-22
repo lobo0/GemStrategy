@@ -8,7 +8,7 @@ from functools import lru_cache
 from io import StringIO
 from curl_cffi import requests as cffi_requests
 from requests.exceptions import RequestException
-from config import TICKERS, BENCHMARK_TICKER, EQUITY_ETFS, BOND_ETFS
+
 from logging_config import configure_logging_from_env, get_logger
 from error_handling import (
     DataFetchError, DataProcessingError, StrategyCalculationError,
@@ -180,7 +180,7 @@ async def form_get(request: Request):
     """
     logger.debug("GET request to main form")
     today_date = datetime.today().strftime('%Y-%m-%d')
-    return templates.TemplateResponse(request, "index.html", {"results": None, "choice": None, "benchmark": None, "today_date": today_date})
+    return templates.TemplateResponse("index.html", {"request": request, "results": None, "choice": None, "benchmark": None, "today_date": today_date})
 
 @app.post("/", response_class=HTMLResponse)
 async def calculate(
@@ -207,7 +207,7 @@ async def calculate(
         # Get data using services
         results_data = data_service.get_all_etf_returns(reference_date_str)
         benchmark_result = data_service.get_benchmark_data(reference_date_str)
-        choice = strategy_service.calculate_gem_strategy(results_data, EQUITY_ETFS, BOND_ETFS)
+        choice = strategy_service.calculate_gem_strategy(results_data, settings.etf.equity_etfs, settings.etf.bond_etfs)
         
         logger.info(f"Strategy calculation completed. Recommendation: {choice}")
 
@@ -217,7 +217,8 @@ async def calculate(
         
         logger.info(f"Template data prepared: {len(results_for_template)} results, {len(chart_data)} chart datasets")
 
-        return templates.TemplateResponse(request, "index.html", {
+        return templates.TemplateResponse("index.html", {
+            "request": request,
             "results": results_for_template, 
             "choice": choice, 
             "benchmark": benchmark_result, 
@@ -227,7 +228,8 @@ async def calculate(
         
     except ValidationError as e:
         logger.error(f"Validation error: {e}")
-        return templates.TemplateResponse(request, "index.html", {
+        return templates.TemplateResponse("index.html", {
+            "request": request,
             "results": None, 
             "choice": f"Błąd: {e.message}", 
             "benchmark": None, 
@@ -237,13 +239,78 @@ async def calculate(
         
     except Exception as e:
         logger.error(f"Unexpected error in calculation endpoint: {e}", exc_info=True)
-        return templates.TemplateResponse(request, "index.html", {
+        return templates.TemplateResponse("index.html", {
+            "request": request,
             "results": None, 
             "choice": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.", 
             "benchmark": None, 
             "today_date": reference_date_str,
             "chart_data": "[]"
         })
+
+# New API endpoints for better functionality
+@app.get("/api/health", tags=["health"])
+async def health_check():
+    """
+    Health check endpoint for monitoring.
+    
+    Returns:
+        Health status information
+    """
+    return {
+        "status": "healthy",
+        "version": settings.api.version,
+        "environment": settings.environment,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/api/etfs", tags=["data"])
+async def get_etf_list():
+    """
+    Get list of available ETFs.
+    
+    Returns:
+        List of ETF information
+    """
+    etf_list = []
+    for name, ticker in settings.etf.tickers.items():
+        etf_type = "equity" if name in settings.etf.equity_etfs else "bond"
+        etf_list.append({
+            "name": name,
+            "ticker": ticker,
+            "type": etf_type
+        })
+    
+    return {
+        "etfs": etf_list,
+        "total": len(etf_list),
+        "equity_count": len(settings.etf.equity_etfs),
+        "bond_count": len(settings.etf.bond_etfs)
+    }
+
+@app.get("/api/strategy/parameters", tags=["strategy"])
+async def get_strategy_parameters():
+    """
+    Get current GEM strategy parameters.
+    
+    Returns:
+        Strategy parameters and configuration
+    """
+    return {
+        "strategy_name": "Global Equities Momentum (GEM)",
+        "description": "Momentum-based strategy that invests in the best performing equity ETF or moves to bonds if all equities are negative",
+        "parameters": {
+            "lookback_period": "12 months",
+            "rebalance_frequency": "monthly",
+            "equity_etfs": settings.etf.equity_etfs,
+            "bond_etfs": settings.etf.bond_etfs,
+            "benchmark": settings.etf.benchmark_ticker
+        },
+        "cache_settings": {
+            "ttl_hours": settings.data.cache_ttl_hours,
+            "max_retries": settings.data.max_retries
+        }
+    }
 
 # New API endpoints for better functionality
 @app.get("/api/health", tags=["health"])

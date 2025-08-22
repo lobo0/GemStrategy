@@ -1,0 +1,361 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Logs
+logs/
+*.log
+errors_*.log
+deployment-report-*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# =============================================================================
+# DEPLOYMENT & CONFIGURATION FILES
+# =============================================================================
+
+# Vercel
+.vercel/
+.vercelignore
+vercel.json
+
+# Google Cloud Platform
+.gcloud/
+*.key
+*.pem
+*.p12
+*.crt
+service-account-*.json
+gcloud-config.json
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+*.yaml.bak
+*.yml.bak
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+ansible.cfg
+hosts
+group_vars/
+host_vars/
+
+# CI/CD
+.github/workflows/deploy.yml
+.github/workflows/*.yml
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
+
+# =============================================================================
+# APPLICATION SPECIFIC
+# =============================================================================
+
+# Configuration files with sensitive data
+# config_package/settings.py
+config_package/local_settings.py
+config_package/production.py
+config_package/staging.py
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+cache/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Local development files
+local_*
+dev_*
+test_*
+staging_*
+
+# =============================================================================
+# SECURITY & SENSITIVE FILES
+# =============================================================================
+
+# API keys and secrets
+secrets.json
+secrets.yaml
+secrets.yml
+*.secret
+*.key
+*.pem
+*.p12
+*.crt
+*.csr
+
+# SSL certificates
+ssl/
+certs/
+*.crt
+*.key
+*.pem
+*.p12
+*.csr
+
+# SSH keys
+.ssh/
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# GPG keys
+*.gpg
+*.asc
+.gnupg/
+
+# =============================================================================
+# MONITORING & LOGS
+# =============================================================================
+
+# Application logs
+app.log
+application.log
+gemstrategy.log
+error.log
+access.log
+
+# System logs
+system.log
+syslog
+
+# Performance monitoring
+*.perf
+*.profile
+*.trace
+
+# =============================================================================
+# BACKUP & ARCHIVE
+# =================================gcloudignore
+# =============================================================================
+
+# Archive files
+*.tar
+*.tar.gz
+*.tar.bz2
+*.zip
+*.rar
+*.7z
+
+# Backup directories
+backup/
+backups/
+archive/
+archives/
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+
+# Node.js (if using for deployment scripts)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Python development tools
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# =============================================================================
+# CUSTOM EXCLUSIONS
+# =============================================================================
+
+# Custom deployment files
+deploy-*.sh
+deploy-*.ps1
+deploy-*.bat
+cleanup-repository.py
+
+# Local configuration overrides
+local_config.py
+local_settings.py
+local.env
+
+# Test data
+test_data/
+sample_data/
+fixtures/
+
+# Documentation builds
+docs/_build/
+site/

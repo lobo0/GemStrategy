@@ -1,17 +1,31 @@
-# Use official Python 3.11 slim image
+# Stage 1: Builder
+FROM python:3.11-slim as builder
+
+# Set working directory
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+
+# Create a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy requirements and install dependencies
+COPY requirements-prod.txt .
+RUN pip install --no-cache-dir -r requirements-prod.txt
+
+# Stage 2: Runner
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Set path to use virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
 COPY . .
@@ -27,17 +41,12 @@ ENV ENVIRONMENT=production
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/api/health || exit 1
-
-# Run the application with gunicorn
+# Run the application with a resource-friendly gunicorn command
 CMD exec gunicorn --bind :$PORT \
-    --workers 2 \
+    --workers 1 \
+    --threads 4 \
     --worker-class uvicorn.workers.UvicornWorker \
-    --worker-connections 1000 \
     --max-requests 1000 \
     --max-requests-jitter 100 \
     --timeout 120 \
-    --keep-alive 2 \
     main:app

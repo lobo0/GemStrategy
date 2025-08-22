@@ -8,7 +8,7 @@ import pandas as pd
 from io import StringIO
 import logging
 from error_handling import DataFetchError, DataProcessingError
-from config import TICKERS, BENCHMARK_TICKER
+from config_package.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ class DataService:
     def __init__(self, data_fetcher):
         self.data_fetcher = data_fetcher
         self.logger = logger
+        self.settings = get_settings()
     
     def get_all_etf_returns(self, ref_date_str: str) -> Dict[str, Dict[str, Any]]:
         """
@@ -33,7 +34,7 @@ class DataService:
         self.logger.info(f"Fetching returns for all ETFs with reference date: {ref_date_str}")
         results = {}
         
-        for name, ticker in TICKERS.items():
+        for name, ticker in self.settings.etf.tickers.items():
             self.logger.debug(f"Processing ETF: {name} ({ticker})")
             try:
                 ret, start_date, end_date, historical_data = self.data_fetcher.get_return(ticker, ref_date_str)
@@ -68,10 +69,10 @@ class DataService:
         Returns:
             Dictionary containing benchmark data
         """
-        self.logger.info(f"Fetching benchmark return for {BENCHMARK_TICKER} with reference date: {ref_date_str}")
+        self.logger.info(f"Fetching benchmark return for {self.settings.etf.benchmark_ticker} with reference date: {ref_date_str}")
         
         try:
-            bench_ret, bench_start, bench_end, historical_data = self.data_fetcher.get_return(BENCHMARK_TICKER, ref_date_str)
+            bench_ret, bench_start, bench_end, historical_data = self.data_fetcher.get_return(self.settings.etf.benchmark_ticker, ref_date_str)
             
             if bench_ret is not None:
                 bench_ret_rounded = round(bench_ret, 2)

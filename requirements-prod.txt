@@ -8,6 +8,7 @@ python-multipart==0.0.6
 requests==2.31.0
 curl-cffi==0.5.9
 python-dateutil==2.8.2
+python-dotenv==1.1.1
 
 # Optional: Add monitoring and performance tools
 # prometheus-client==0.19.0
